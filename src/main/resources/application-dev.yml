@@ -26,3 +26,8 @@ spring:
      database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
      database: MYSQL
      show-sql: true
+     mapping-resources:
+
+jwt:
+  base64-secret: MTIxZGJkMGFlODM1Zjg2MGNmZmYwNTBkNmVmM2Q4MGRlMzk4NjNkOWQyZGJlNjViYTI4NWEzMTg5YWI2ZDYzZjA1MTE3MTg4ZWM2YTAyY2ExYTVjZTYwZTRkYWIyYmUxNTBhZTM2NjBlYTA0OWU0NTY0MmM4OGQ2NjU2ZmFmMGI=
+  token-validity: 86400

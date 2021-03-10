@@ -1,5 +1,8 @@
 package jp.gmo.user.service;
 
-public class UserService {
+import jp.gmo.user.dto.request.LoginRequestDto;
+import jp.gmo.user.dto.response.LoginResponseDto;
 
+public interface UserService {
+    LoginResponseDto executeAuthorize(LoginRequestDto loginRequestDto);
 }
