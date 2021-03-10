@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration>
+    <!-- <include resource="org/springframework/boot/logging/logback/base.xml"/> -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Define log file -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <property name="APP_LOG_FILE" value="${LOG_PATH}/${springAppName}.log"/>
+    <property name="ROOT_LOG_FILE" value="${LOG_PATH}/${springAppName}_program.log"/>
+
+
+    <!-- The FILE and ASYNC appenders are here as examples for a production configuration -->
+    <appender name="ConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="AppFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_FILE}.%d{yyyy-MM-dd}_%i.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <charset>utf-8</charset>
+            <Pattern>${FILE_LOG_PATTERN}</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RootFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ROOT_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${ROOT_LOG_FILE}.%d{yyyy-MM-dd}_%i.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>utf-8</charset>
+            <Pattern>${FILE_LOG_PATTERN}</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="vn.com.aviva.cp.user" level="INFO" additivity="false">
+        <appender-ref ref="AppFileAppender" />
+        <appender-ref ref="ConsoleAppender" />
+    </logger>
+
+    <logger name="org.hibernate.SQL" level="WARN" additivity="false">
+        <appender-ref ref="AppFileAppender" />
+        <appender-ref ref="ConsoleAppender" />
+    </logger>
+
+    <!--     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+            <appender-ref ref="AppFileAppender" />
+        </logger> -->
+
+    <root level="INFO">
+        <appender-ref ref="RootFileAppender" />
+        <appender-ref ref="ConsoleAppender" />
+    </root>
+    <!--     <logger name="org.springframework.orm.jpa" level="DEBUG" />
+        <logger name="org.springframework.transaction" level="DEBUG" /> -->
+    <logger name="javax.activation" level="WARN" />
+    <logger name="javax.mail" level="WARN" />
+    <logger name="javax.management.remote" level="WARN" />
+    <logger name="javax.xml.bind" level="WARN" />
+    <logger name="ch.qos.logback" level="DEBUG" />
+    <logger name="com.codahale.metrics" level="WARN" />
+    <logger name="com.ryantenney" level="WARN" />
+    <logger name="com.sun" level="WARN" />
+    <logger name="com.zaxxer" level="WARN" />
+    <logger name="io.undertow" level="WARN" />
+    <logger name="io.undertow.websockets.jsr" level="ERROR" />
+    <logger name="org.ehcache" level="WARN" />
+    <logger name="org.apache" level="WARN" />
+    <logger name="org.apache.catalina.startup.DigesterFactory" level="OFF" />
+    <logger name="org.bson" level="WARN" />
+    <logger name="org.hibernate.validator" level="INFO" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.ejb.HibernatePersistence" level="OFF" />
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.springframework.web" level="WARN" />
+    <logger name="org.springframework.security" level="WARN" />
+    <logger name="org.springframework.cache" level="WARN" />
+    <logger name="org.thymeleaf" level="WARN" />
+    <logger name="org.xnio" level="WARN" />
+    <logger name="springfox" level="WARN" />
+    <logger name="sun.rmi" level="WARN" />
+    <logger name="sun.rmi.transport" level="WARN" />
+    <logger name="com.amazonaws" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+
+
+    <!-- https://logback.qos.ch/manual/configuration.html#shutdownHook and https://jira.qos.ch/browse/LOGBACK-1090 -->
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook" />
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+</configuration>
