@@ -1,34 +1,34 @@
 package jp.gmo.user.utils;
 
-import jp.gmo.user.dto.FieldErrorDto;
-import jp.gmo.user.dto.ResponseDto;
-
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+
+import jp.gmo.user.exception.FieldError;
+import jp.gmo.user.response.ResponseCommon;
 
 public class ResponseUtils {
 
-    public static Map<String, Object> success(Object data, String message) {
-        Map<String, Object> response = new HashMap<>();
+    public static ResponseCommon success(Object data, String message) {
 
-        ResponseDto res = new ResponseDto();
+    	ResponseCommon res = new ResponseCommon();
         res.setResult(data);
         res.setMessage(message);
-        response.put("response", res);
-
-        return response;
-    }
-
-    public static ResponseDto errors(String message) {
-        ResponseDto res = new ResponseDto();
-        res.setMessage(message);
+        res.setTimestamp(LocalDateTime.now());
         return res;
     }
 
-    public static ResponseDto errors(List<FieldErrorDto> data) {
-        ResponseDto res = new ResponseDto();
-        res.setErrors(data);
+    public static ResponseCommon errors(String message) {
+        ResponseCommon res = new ResponseCommon();
+        res.setMessage(message);
+        res.setTimestamp(LocalDateTime.now());
+        return res;
+    }
+
+    public static ResponseCommon errors(String message, List<FieldError> errors) {
+        ResponseCommon res = new ResponseCommon();
+    	res.setMessage(message);
+        res.setErrors(errors);
+        res.setTimestamp(LocalDateTime.now());
         return res;
     }
 }

@@ -1,13 +1,12 @@
-package jp.gmo.user.dto;
+package jp.gmo.user.response.data;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AccountDto {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class AccountResponseData {
     private String employeeCode;
     private String email;
     private String employeeName;

@@ -1,16 +1,20 @@
-package jp.gmo.user.dto;
+package jp.gmo.user.response;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Data;
 
-import java.util.List;
+import jp.gmo.user.exception.FieldError;
+import lombok.Data;
 
 @JsonSerialize
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
-public class ResponseDto {
+public class ResponseCommon {
     @JsonProperty(value = "data", index = 1)
     private Object result;
 
@@ -18,7 +22,9 @@ public class ResponseDto {
     private String message;
 
     @JsonProperty(value = "errors", index = 3)
-    private List<FieldErrorDto> errors;
+    private List<FieldError> errors;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime timestamp;
 }
 

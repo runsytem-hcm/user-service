@@ -6,19 +6,36 @@
     <named-native-query name="getAccountInfo" result-set-mapping="accountInfo">
         <query>
             SELECT e.employee_code AS employeeCode,
+                   e.email AS email,
                    e.employee_name AS employeeName,
+                   a.password AS password,
                    a.role_id AS roleId
             FROM accounts a
-            INNER JOIN employees e ON e.employee_code = :employeeCode AND e.delete_flag = 0
+            INNER JOIN employees e ON e.employee_code = a.employee_code AND e.delete_flag = 0
             WHERE e.email = :email
               AND a.delete_flag = 0
         </query>
     </named-native-query>
 
+    <named-native-query name="updatePassword">
+        <query>
+            UPDATE accounts a
+            INNER JOIN employees e ON e.employee_code = a.employee_code AND e.delete_flag = 0
+            SET a.password = :password,
+                a.update_time = :currentDateTime,
+                a.update_by = :updateBy
+            WHERE e.email = :email
+            AND a.delete_flag = 0
+        </query>
+    </named-native-query>
+
+
     <sql-result-set-mapping name="accountInfo">
         <constructor-result target-class="jp.gmo.user.dto.AccountDto">
             <column name="employeeCode" />
+            <column name="email" />
             <column name="employeeName" />
+            <column name="password" />
             <column name="roleId" />
         </constructor-result>
     </sql-result-set-mapping>

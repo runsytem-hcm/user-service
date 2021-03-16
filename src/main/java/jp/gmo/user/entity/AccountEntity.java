@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Data
@@ -27,18 +28,17 @@ public class AccountEntity implements Serializable {
     private String employeeCode;
 
     @NotNull
-    @Size(max = 1)
     @Column(name = "role_id", length = 1, nullable = false)
     private Integer roleId;
 
     @Column(name = "create_time")
-    private ZonedDateTime createTime;
+    private LocalDateTime createTime;
 
     @Column(name = "create_by")
     private String createBy;
 
     @Column(name = "update_time")
-    private ZonedDateTime updateTime;
+    private LocalDateTime updateTime;
 
     @Column(name = "update_by")
     private String updateBy;
