@@ -18,6 +18,7 @@ public class ResponseUtils {
     }
 
     public static ResponseCommon errors(String message) {
+
         ResponseCommon res = new ResponseCommon();
         res.setMessage(message);
         res.setTimestamp(LocalDateTime.now());

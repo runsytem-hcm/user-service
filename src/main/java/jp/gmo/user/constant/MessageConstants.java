@@ -12,6 +12,10 @@ public class MessageConstants {
     public static final String CONST_MSG_VALIDATE_EMAIL_NOT_EXIST                           = "rs.msg.validate.email.not.exist";
     public static final String CONST_MSG_VALIDATE_LENGTH_PASSWORD                           = "rs.msg.validate.length.password";
     public static final String CONST_MSG_VALIDATE_NUMBER                                    = "rs.msg.validate.number";
+    public static final String CONST_MSG_VALIDATE_EMAIL_OR_CODE                             = "rs.msg.validate.email.or.code";
+    public static final String CONST_MSG_VALIDATE_EMPLOYEES_MAX_LENGTH                      = "rs.msg.validate.employees.max.length";
+    public static final String CONST_MSG_VALIDATE_EMPLOYEES_CODE_MAX_LENGTH                 = "rs.msg.validate.employees.code.max.length";
+    public static final String CONST_MSG_VALIDATE_EMPLOYEE_CODE                             = "rs.msg.validate.employee.code";
 
     /** ============================================== MESSAGE ERROR ============================================= */
     public static final String CONST_ERROR_UPDATE_PASSWORD                                  = "rs.err.update.password";
