@@ -9,12 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
     @Query(name = "getAccountInfo", nativeQuery = true)
-    AccountDto getAccountInfo(@Param("email") String email);
+    Optional<AccountDto> getAccountInfo(@Param("email") String email);
 
     @Query(name = "updatePassword", nativeQuery = true)
     @Modifying

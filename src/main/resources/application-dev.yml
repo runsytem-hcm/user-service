@@ -1,7 +1,7 @@
 logging:
   level:
-    ROOT: info
-    jp.gmo.user: info
+    ROOT: debug
+    jp.gmo.user: debug
   file:
     path: log
 

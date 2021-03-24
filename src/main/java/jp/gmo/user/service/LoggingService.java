@@ -47,7 +47,7 @@ public class LoggingService {
 
             if (body != null) {
                 ObjectMapper mapper = new ObjectMapper();
-                stringBuilder.append("body=[" + mapper.writeValueAsString(body) + "]");
+                stringBuilder.append("body=[").append(mapper.writeValueAsString(body)).append("]");
             }
 
             LOG.info("{}", stringBuilder);

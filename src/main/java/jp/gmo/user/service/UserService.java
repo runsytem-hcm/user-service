@@ -1,11 +1,16 @@
 package jp.gmo.user.service;
 
+import jp.gmo.user.dto.AccountDto;
+import jp.gmo.user.dto.EmployeeDto;
 import jp.gmo.user.request.*;
 import jp.gmo.user.response.data.AccountResponseData;
 import jp.gmo.user.response.data.PageAndDataResponseData;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface UserService {
-    AccountResponseData executeGetInfoAccount(LoginRequest request);
+    Optional<AccountDto> executeGetInfoAccount(String email);
 
     void executeResetPassword(ResetPasswordRequest request);
 
@@ -15,5 +20,5 @@ public interface UserService {
 
     void executeAddEmployees(AddEmployeesRequest request);
 
-    PageAndDataResponseData executeGetListEmployees(SearchEmployeesRequest request);
+    PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(SearchEmployeesRequest request);
 }

@@ -5,11 +5,11 @@ import jp.gmo.user.constant.MessageConstants;
 import org.zalando.problem.AbstractThrowableProblem;
 import org.zalando.problem.Status;
 
-public class InsertDataException extends AbstractThrowableProblem {
+public class EmailAlreadyUsedException extends BadRequestAlertException {
 
     private static final long serialVersionUID = 1L;
 
-    public InsertDataException() {
-        super(ErrorConstants.DEFAULT_TYPE, MessageConstants.CONST_ERROR_INSERT_DATA, Status.INTERNAL_SERVER_ERROR);
+    public EmailAlreadyUsedException() {
+        super(ErrorConstants.DEFAULT_TYPE, "Email is already in use!");
     }
 }

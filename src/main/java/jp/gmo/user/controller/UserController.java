@@ -1,17 +1,19 @@
 package jp.gmo.user.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import jp.gmo.user.dto.AccountDto;
+import jp.gmo.user.dto.EmployeeDto;
 import jp.gmo.user.request.*;
-import jp.gmo.user.response.ResponseCommonTest;
-import jp.gmo.user.response.data.AccountResponseData;
+import jp.gmo.user.response.data.PageAndDataResponseData;
+import jp.gmo.user.utils.ResponseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jp.gmo.user.constant.MessageConstants;
 import jp.gmo.user.response.ResponseCommon;
@@ -20,46 +22,48 @@ import jp.gmo.user.utils.ResponseUtils;
 import jp.gmo.user.utils.Utils;
 import lombok.AllArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/user")
 public class UserController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    @PostMapping("/get-account-info")
-    public ResponseEntity<ResponseCommonTest<AccountResponseData>> executeGetAccountInfo(@Valid @RequestBody LoginRequest request){
-        return new ResponseEntity<>(ResponseCommonTest.create(userService.executeGetInfoAccount(request), "", LocalDateTime.now()), HttpStatus.OK);
+    @GetMapping("/get-account")
+    public ResponseEntity<AccountDto> executeGetAccountInfo(HttpServletRequest request, @Param("email") String email){
+        log.debug("REQUEST method=[{}] path=[{}] parameters=[{}]", request.getMethod(), request.getRequestURI(), email);
+        return ResponseUtil.wrapOrNotFound(userService.executeGetInfoAccount(email).map(AccountDto::new));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ResponseCommon> executeResetPassword(@Valid @RequestBody ResetPasswordRequest request){
+    @ResponseStatus(HttpStatus.OK)
+    public void executeResetPassword(@Valid @RequestBody ResetPasswordRequest request){
         userService.executeResetPassword(request);
-        return new ResponseEntity<>(ResponseUtils.success(null, Utils.getMessage(MessageConstants.CONST_MSG_NORMAL)), HttpStatus.OK);
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<ResponseCommon> executeChangePassword(@RequestHeader("email") String email, @Valid @RequestBody ChangePasswordRequest request){
+    @ResponseStatus(HttpStatus.OK)
+    public void executeChangePassword(@RequestHeader("email") String email, @Valid @RequestBody ChangePasswordRequest request){
         userService.executeChangePassword(email, request);
-        return new ResponseEntity<>(ResponseUtils.success(null, Utils.getMessage(MessageConstants.CONST_MSG_NORMAL)), HttpStatus.OK);
     }
 
     @PostMapping("/create-account")
-    public ResponseEntity<ResponseCommon> executeCreateAccount(@Valid @RequestBody CreateAccountRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void executeCreateAccount(@Valid @RequestBody CreateAccountRequest request) {
         userService.executeCreateAccount(request);
-        return new ResponseEntity<>(ResponseUtils.success(null, Utils.getMessage(MessageConstants.CONST_MSG_NORMAL)), HttpStatus.CREATED);
     }
 
     @PostMapping("/add-employees")
-    public ResponseEntity<ResponseCommon> executeAddEmployees(@Valid @RequestBody AddEmployeesRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void executeAddEmployees(@Valid @RequestBody AddEmployeesRequest request) {
         userService.executeAddEmployees(request);
-        return new ResponseEntity<>(ResponseUtils.success(null, Utils.getMessage(MessageConstants.CONST_MSG_NORMAL)), HttpStatus.CREATED);
     }
 
     @PostMapping("/list-employees")
-    public ResponseEntity<ResponseCommon> executeGetListEmployees(@Valid @RequestBody SearchEmployeesRequest request) {
-        return new ResponseEntity<>(ResponseUtils.success(userService.executeGetListEmployees(request), Utils.getMessage(MessageConstants.CONST_MSG_NORMAL)), HttpStatus.OK);
+    public ResponseEntity<PageAndDataResponseData<List<EmployeeDto>>> executeGetListEmployees(@Valid @RequestBody SearchEmployeesRequest request) {
+        return new ResponseEntity<>(userService.executeGetListEmployees(request), HttpStatus.OK);
     }
 }

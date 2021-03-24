@@ -10,15 +10,16 @@ import jp.gmo.user.entity.key.EmployeesKey;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeesRepository extends JpaRepository<EmployeesEntity, EmployeesKey> {
 
     @Query(value = "SELECT e.* FROM employees e WHERE e.email = :email AND e.delete_flag = 0", nativeQuery = true)
-    EmployeesEntity findByEmail(@Param("email") String email);
+    Optional<EmployeesEntity> findByEmail(@Param("email") String email);
 
     @Query(value = "SELECT e.* FROM employees e WHERE (e.email = :email OR e.employee_code = :employee_code) AND e.delete_flag = 0", nativeQuery = true)
-    EmployeesEntity findByEmployees(@Param("email") String email, @Param("employee_code") String employeeCode);
+    Optional<EmployeesEntity> findByEmployees(@Param("email") String email, @Param("employee_code") String employeeCode);
 
     @Query(value = "SELECT e.* FROM employees e " +
             "WHERE (LENGTH(:email) = 0 OR e.email LIKE %:email%) " +
