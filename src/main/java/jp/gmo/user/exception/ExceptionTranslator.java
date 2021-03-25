@@ -1,5 +1,6 @@
 package jp.gmo.user.exception;
 
+import jp.gmo.user.utils.Utils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,7 +12,6 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.ProblemBuilder;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
 import org.zalando.problem.spring.web.advice.security.SecurityAdviceTrait;
-import org.zalando.problem.violations.ConstraintViolationProblem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,12 +31,12 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
 
 
     @Override
-    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity, NativeWebRequest request) {
+    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity, @Nonnull NativeWebRequest request) {
         if (entity == null) {
             return null;
         }
         Problem problem = entity.getBody();
-        if (!(problem instanceof ConstraintViolationProblem || problem instanceof DefaultProblem)) {
+        if (!(problem instanceof DefaultProblem)) {
             return entity;
         }
         ProblemBuilder builder = Problem.builder()
@@ -46,7 +46,7 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
         problem.getParameters().forEach(builder::with);
 
         if (!problem.getParameters().containsKey(MESSAGE_KEY) && problem.getStatus() != null) {
-            builder.with(MESSAGE_KEY, "error.http." + problem.getStatus().getStatusCode());
+            builder.with(MESSAGE_KEY, Utils.getMessage("rs.error." + problem.getStatus().getStatusCode()));
         }
 
         builder.with("timestamp", LocalDateTime.now());
@@ -64,7 +64,7 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
         Problem problem = Problem.builder()
                 .withTitle("Method argument not valid")
                 .withStatus(defaultConstraintViolationStatus())
-                .with(MESSAGE_KEY, "")
+                .with(MESSAGE_KEY, Utils.getMessage("rs.validate." + defaultConstraintViolationStatus()))
                 .with(FIELD_ERRORS_KEY, fieldErrors)
                 .build();
         return create(ex, problem, request);

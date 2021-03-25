@@ -18,6 +18,5 @@ public class MessageConstants {
     public static final String CONST_MSG_VALIDATE_EMPLOYEE_CODE                             = "rs.msg.validate.employee.code";
 
     /** ============================================== MESSAGE ERROR ============================================= */
-    public static final String CONST_ERROR_UPDATE_PASSWORD                                  = "rs.err.update.password";
-    public static final String CONST_ERROR_INSERT_DATA                                      = "rs.err.insert.data";
+
 }
