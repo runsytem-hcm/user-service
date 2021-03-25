@@ -19,7 +19,7 @@ public class Utils {
 
 	public static String getMessage(String messageCode) {
 		try {
-			InputStream utf8in = ResponseUtils.class.getClassLoader().getResourceAsStream("i18n/messages.properties");
+			InputStream utf8in = Utils.class.getClassLoader().getResourceAsStream("i18n/messages.properties");
 			Properties props = new Properties();
 			if(utf8in != null){
 				Reader reader = new InputStreamReader(utf8in, StandardCharsets.UTF_8);

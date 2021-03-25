@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         String newPassword = bCryptPasswordEncoder.encode(request.getNewPassword());
         log.debug("Old password: {}", request.getCurrentPassword());
 
-        accountRepository.updatePassword(email, newPassword, LocalDateTime.now(), Utils.getUpdateBy(email));
+        accountRepository.updatePassword(accountDto.getEmail(), newPassword, LocalDateTime.now(), Utils.getUpdateBy(accountDto.getEmail()));
         log.debug("New password: {}", newPassword);
     }
 
@@ -99,13 +99,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void executeAddEmployees(AddEmployeesRequest request) {
 
         EmployeesKey key = new EmployeesKey();
         key.setEmail(request.getEmail());
         key.setEmployeeCode(request.getEmployeeCode());
 
-        employeesRepository.findByEmployees(request.getEmail(), request.getEmployeeCode()).ifPresent(em -> {
+        employeesRepository.findByEmailAndCode(request.getEmail(), request.getEmployeeCode()).ifPresent(em -> {
             throw new EmailAlreadyUsedException();
         });
 
@@ -122,6 +123,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(SearchEmployeesRequest request) {
 
         int limit = Integer.parseInt(request.getTotalRecordOfPage());
@@ -136,5 +138,28 @@ public class UserServiceImpl implements UserService {
         BigInteger totalRecord = employeesRepository.countEmployees(request.getEmail(), request.getEmployeeName());
 
         return PageAndDataResponseData.create(employeeDtoList, request.getCurrentPage(), request.getCurrentPage(), String.valueOf(totalRecord));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<EmployeeDto> executeGetDetailEmployee(String employeeCode) {
+        return employeesRepository.findByCode(employeeCode).map(employeeMapper::toEmployeesDto);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void executeUpdateEmployees(UpdateEmployeesRequest request) {
+        employeesRepository.findByCode(request.getEmployeeCode()).ifPresent(employee -> {
+
+            EmployeesKey key = employee.getId();
+            key.setEmail(request.getEmail());
+
+            employee.setId(key);
+            employee.setEmployeeName(request.getEmployeeName());
+            employee.setUpdateBy(Utils.getUpdateBy(request.getEmail()));
+            employee.setUpdateTime(LocalDateTime.now());
+
+            log.debug("Changed Information for Employee: {}", employee);
+        });
     }
 }

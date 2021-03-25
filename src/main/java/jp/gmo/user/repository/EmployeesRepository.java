@@ -19,7 +19,7 @@ public interface EmployeesRepository extends JpaRepository<EmployeesEntity, Empl
     Optional<EmployeesEntity> findByEmail(@Param("email") String email);
 
     @Query(value = "SELECT e.* FROM employees e WHERE (e.email = :email OR e.employee_code = :employee_code) AND e.delete_flag = 0", nativeQuery = true)
-    Optional<EmployeesEntity> findByEmployees(@Param("email") String email, @Param("employee_code") String employeeCode);
+    Optional<EmployeesEntity> findByEmailAndCode(@Param("email") String email, @Param("employee_code") String employeeCode);
 
     @Query(value = "SELECT e.* FROM employees e " +
             "WHERE (LENGTH(:email) = 0 OR e.email LIKE %:email%) " +
@@ -33,4 +33,7 @@ public interface EmployeesRepository extends JpaRepository<EmployeesEntity, Empl
             "AND (LENGTH(:employee_name) = 0 OR e.employee_name LIKE %:employee_name%) " +
             "AND e.delete_flag = 0 " , nativeQuery = true)
     BigInteger countEmployees(@Param("email") String email, @Param("employee_name") String employeeName);
+
+    @Query(value = "SELECT e.* FROM employees e WHERE e.employee_code = :employee_code AND e.delete_flag = 0", nativeQuery = true)
+    Optional<EmployeesEntity> findByCode(@Param("employee_code") String employeeCode);
 }

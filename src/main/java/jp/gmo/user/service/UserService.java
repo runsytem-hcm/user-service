@@ -3,7 +3,6 @@ package jp.gmo.user.service;
 import jp.gmo.user.dto.AccountDto;
 import jp.gmo.user.dto.EmployeeDto;
 import jp.gmo.user.request.*;
-import jp.gmo.user.response.data.AccountResponseData;
 import jp.gmo.user.response.data.PageAndDataResponseData;
 
 import java.util.List;
@@ -21,4 +20,8 @@ public interface UserService {
     void executeAddEmployees(AddEmployeesRequest request);
 
     PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(SearchEmployeesRequest request);
+
+    Optional<EmployeeDto> executeGetDetailEmployee(String employeeCode);
+
+    void executeUpdateEmployees(UpdateEmployeesRequest request);
 }
