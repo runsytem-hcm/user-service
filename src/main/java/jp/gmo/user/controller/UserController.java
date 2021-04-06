@@ -61,7 +61,7 @@ public class UserController {
             @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size) {
 
-        Pageable paging = PageRequest.of(page, size, Sort.by("create_time").descending());
+        Pageable paging = PageRequest.of((page - 1), size, Sort.by("create_time").descending());
 
         return new ResponseEntity<>(userService.executeGetListEmployees(employeeName, email, paging), HttpStatus.OK);
     }
