@@ -9,7 +9,7 @@ import jp.gmo.user.entity.EmployeesEntity;
 @Mapper
 public interface EmployeeMapper {
 
-    @Mapping(source = "entity.id.employeeCode", target = "employeeCode")
-    @Mapping(source = "entity.id.email", target = "email")
+//    @Mapping(source = "entity.id.employeeCode", target = "employeeCode")
+//    @Mapping(source = "entity.id.email", target = "email")
     EmployeeDto toEmployeesDto(EmployeesEntity entity);
 }

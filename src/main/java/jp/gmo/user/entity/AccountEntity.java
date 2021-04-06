@@ -1,6 +1,9 @@
 package jp.gmo.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,18 +20,13 @@ public class AccountEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", length = 11, nullable = false)
+    @Column(name = "id")
     private long id;
 
-    @NotNull
     @Column(name = "password")
     private String password;
 
-    @Column(name = "employee_code")
-    private String employeeCode;
-
-    @NotNull
-    @Column(name = "role_id", length = 1, nullable = false)
+    @Column(name = "role_id")
     private Integer roleId;
 
     @Column(name = "create_time")
@@ -45,4 +43,10 @@ public class AccountEntity implements Serializable {
 
     @Column(name = "delete_flag")
     private int deleteFlag;
+
+    @OneToOne()
+    @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "employee_code")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private EmployeesEntity emp;
 }

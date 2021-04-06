@@ -7,6 +7,9 @@ import jp.gmo.user.response.data.PageAndDataResponseData;
 import jp.gmo.user.service.UserService;
 import jp.gmo.user.utils.ResponseUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +30,13 @@ public class UserController {
         return ResponseUtil.wrapOrNotFound(userService.executeGetInfoAccount(email).map(AccountDto::new));
     }
 
-    @PostMapping("/reset-password")
+    @PutMapping("/reset-password")
     @ResponseStatus(HttpStatus.OK)
     public void executeResetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         userService.executeResetPassword(request);
     }
 
-    @PostMapping("/change-password")
+    @PutMapping("/change-password")
     @ResponseStatus(HttpStatus.OK)
     public void executeChangePassword(@RequestHeader("email") String email, @Valid @RequestBody ChangePasswordRequest request) {
         userService.executeChangePassword(email, request);
@@ -51,9 +54,16 @@ public class UserController {
         userService.executeAddEmployees(request);
     }
 
-    @PostMapping("/list-employees")
-    public ResponseEntity<PageAndDataResponseData<List<EmployeeDto>>> executeGetListEmployees(@Valid @RequestBody SearchEmployeesRequest request) {
-        return new ResponseEntity<>(userService.executeGetListEmployees(request), HttpStatus.OK);
+    @GetMapping("/list-employees")
+    public ResponseEntity<PageAndDataResponseData<List<EmployeeDto>>> executeGetListEmployees(
+            @RequestParam(name = "employeeName") String employeeName,
+            @RequestParam(name = "email") String email,
+            @RequestParam(name = "page") int page,
+            @RequestParam(name = "size") int size) {
+
+        Pageable paging = PageRequest.of(page, size, Sort.by("create_time").descending());
+
+        return new ResponseEntity<>(userService.executeGetListEmployees(employeeName, email, paging), HttpStatus.OK);
     }
 
     @GetMapping("/detail-employees")
@@ -66,5 +76,10 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void executeUpdateEmployee(@Valid @RequestBody UpdateEmployeesRequest request) {
         userService.executeUpdateEmployees(request);
+    }
+
+    @GetMapping("/getAll-employees")
+    public ResponseEntity<List<EmployeeDto>> executeGetAllEmployees() {
+        return new ResponseEntity<>(userService.executeGetAllEmployees(), HttpStatus.OK);
     }
 }

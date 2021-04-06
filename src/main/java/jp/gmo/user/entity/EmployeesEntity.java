@@ -2,10 +2,7 @@ package jp.gmo.user.entity;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import jp.gmo.user.entity.key.EmployeesKey;
@@ -16,8 +13,12 @@ import lombok.Data;
 @Table(name = "employees")
 public class EmployeesEntity {
 
-    @EmbeddedId
-    private EmployeesKey id;
+    @Id
+    @Column(name = "employee_code")
+    private String employeeCode;
+
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "employee_name")
     private String employeeName;

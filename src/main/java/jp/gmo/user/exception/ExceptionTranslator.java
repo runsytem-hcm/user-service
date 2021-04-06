@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 
 @ControllerAdvice
-public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait {
+public class ExceptionTranslator implements ProblemHandling {
 
     private static final String FIELD_ERRORS_KEY = "fieldErrors";
     private static final String MESSAGE_KEY = "message";

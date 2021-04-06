@@ -1,5 +1,7 @@
 package jp.gmo.user.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,25 +17,13 @@ import java.util.Optional;
 @Repository
 public interface EmployeesRepository extends JpaRepository<EmployeesEntity, EmployeesKey> {
 
-    @Query(value = "SELECT e.* FROM employees e WHERE e.email = :email AND e.delete_flag = 0", nativeQuery = true)
-    Optional<EmployeesEntity> findByEmail(@Param("email") String email);
+    Optional<EmployeesEntity> findByEmailAndDeleteFlag(String email, int deleteFlag);
 
-    @Query(value = "SELECT e.* FROM employees e WHERE (e.email = :email OR e.employee_code = :employee_code) AND e.delete_flag = 0", nativeQuery = true)
-    Optional<EmployeesEntity> findByEmailAndCode(@Param("email") String email, @Param("employee_code") String employeeCode);
+    Optional<EmployeesEntity> findByEmailAndEmployeeCodeAndDeleteFlag(String email, String employeeCode, int deleteFlag);
 
-    @Query(value = "SELECT e.* FROM employees e " +
-            "WHERE (LENGTH(:email) = 0 OR e.email LIKE %:email%) " +
-            "AND (LENGTH(:employee_name) = 0 OR e.employee_name LIKE %:employee_name%) " +
-            "AND e.delete_flag = 0 " +
-            "ORDER BY e.create_time DESC LIMIT :offset, :limit", nativeQuery = true)
-    List<EmployeesEntity> getListEmployees(@Param("email") String email, @Param("employee_name") String employeeName, @Param("offset") int offset, @Param("limit") int limit);
+    Optional<EmployeesEntity> findByEmployeeCodeAndDeleteFlag(String employeeCode, int deleteFlag);
 
-    @Query(value = "SELECT count(e.employee_code) FROM employees e " +
-            "WHERE (LENGTH(:email) = 0 OR e.email LIKE %:email%) " +
-            "AND (LENGTH(:employee_name) = 0 OR e.employee_name LIKE %:employee_name%) " +
-            "AND e.delete_flag = 0 " , nativeQuery = true)
-    BigInteger countEmployees(@Param("email") String email, @Param("employee_name") String employeeName);
+    List<EmployeesEntity> findByDeleteFlag (int deleteFlag);
 
-    @Query(value = "SELECT e.* FROM employees e WHERE e.employee_code = :employee_code AND e.delete_flag = 0", nativeQuery = true)
-    Optional<EmployeesEntity> findByCode(@Param("employee_code") String employeeCode);
+    Page<EmployeesEntity> findByEmailContainingAndEmployeeNameContainingAndDeleteFlag(String email, String employeeName, int deleteFlag, Pageable paging);
 }

@@ -14,14 +14,5 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
-    @Query(name = "getAccountInfo", nativeQuery = true)
-    Optional<AccountDto> getAccountInfo(@Param("email") String email);
-
-    @Query(name = "updatePassword", nativeQuery = true)
-    @Modifying
-    void updatePassword(
-            @Param("email") String email,
-            @Param("password") String password,
-            @Param("currentDateTime") LocalDateTime currentDateTime,
-            @Param("updateBy") String updateBy);
+    Optional<AccountEntity> findByEmpEmail(String email);
 }

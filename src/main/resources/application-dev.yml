@@ -15,9 +15,9 @@ spring:
     active: dev
   datasource:
      type: com.zaxxer.hikari.HikariDataSource
-     url: jdbc:mysql://10.1.10.250:3306/db_webinternal?useUnicode=true&characterEncoding=utf8&useSSL=false
-     username: runsystem
-     password: Admin123
+     url: jdbc:mysql://103.18.7.212:1247/db_webinternal?useUnicode=true&characterEncoding=utf8&useSSL=false
+     username: runsystem-hcm
+     password: Admi@1234
      hikari:
          auto-commit: false
          data-source-properties:

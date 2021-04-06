@@ -4,6 +4,7 @@ import jp.gmo.user.dto.AccountDto;
 import jp.gmo.user.dto.EmployeeDto;
 import jp.gmo.user.request.*;
 import jp.gmo.user.response.data.PageAndDataResponseData;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +20,11 @@ public interface UserService {
 
     void executeAddEmployees(AddEmployeesRequest request);
 
-    PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(SearchEmployeesRequest request);
+    PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(String employeeName, String email, Pageable paging);
 
     Optional<EmployeeDto> executeGetDetailEmployee(String employeeCode);
 
     void executeUpdateEmployees(UpdateEmployeesRequest request);
+
+    List<EmployeeDto> executeGetAllEmployees();
 }

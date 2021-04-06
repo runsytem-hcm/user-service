@@ -4,10 +4,10 @@ import jp.gmo.user.dto.AccountDto;
 import jp.gmo.user.dto.EmployeeDto;
 import jp.gmo.user.entity.AccountEntity;
 import jp.gmo.user.entity.EmployeesEntity;
-import jp.gmo.user.entity.key.EmployeesKey;
 import jp.gmo.user.exception.EmailAlreadyUsedException;
 import jp.gmo.user.exception.EmailNotExistException;
 import jp.gmo.user.exception.InvalidPasswordException;
+import jp.gmo.user.mapper.AccountMapper;
 import jp.gmo.user.mapper.EmployeeMapper;
 import jp.gmo.user.repository.AccountRepository;
 import jp.gmo.user.repository.EmployeesRepository;
@@ -17,15 +17,17 @@ import jp.gmo.user.service.UserService;
 import jp.gmo.user.utils.RandomUtil;
 import jp.gmo.user.utils.Utils;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,29 +35,40 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class UserServiceImpl implements UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final AccountRepository accountRepository;
     private final EmployeesRepository employeesRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmployeeMapper employeeMapper = Mappers.getMapper(EmployeeMapper.class);
+    private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
 
     @Override
     @Transactional(readOnly = true)
     public Optional<AccountDto> executeGetInfoAccount(String email) {
-        return accountRepository.getAccountInfo(email);
+        return accountRepository.findByEmpEmail(email).map(accountMapper::toAccountDto);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void executeResetPassword(ResetPasswordRequest request) {
 
-        AccountDto accountDto = accountRepository.getAccountInfo(request.getEmail()).map(AccountDto::new).orElseThrow(EmailNotExistException::new);
-        String newPassword = RandomUtil.generatePassword();
-        accountRepository.updatePassword(accountDto.getEmail(), bCryptPasswordEncoder.encode(newPassword),
-                LocalDateTime.now(), Utils.getUpdateBy(request.getEmail()));
-        log.debug("Reset password for User: {}", newPassword);
+        AccountEntity account = accountRepository.findByEmpEmail(request.getEmail()).map(accountEntity -> {
+
+            log.info("Old password for User: {}", accountEntity.getPassword());
+
+            accountEntity.setPassword(bCryptPasswordEncoder.encode(RandomUtil.generatePassword()));
+            accountEntity.setUpdateTime(LocalDateTime.now());
+            accountEntity.setUpdateBy(Utils.getUpdateBy(request.getEmail()));
+
+            return accountEntity;
+
+        }).orElseThrow(EmailNotExistException::new);
+
+        accountRepository.save(account);
+        log.info("New password for User: {}", account.getPassword());
+
         // Send mail
     }
 
@@ -63,103 +76,110 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void executeChangePassword(String email, ChangePasswordRequest request) {
 
-        AccountDto accountDto = accountRepository.getAccountInfo(email).map(acc -> {
-            if (!bCryptPasswordEncoder.matches(request.getCurrentPassword(), acc.getPassword())) {
+        AccountEntity account = accountRepository.findByEmpEmail(email).map(accountEntity -> {
+
+            log.info("Old password for User: {}", accountEntity.getPassword());
+
+            if (!bCryptPasswordEncoder.matches(request.getCurrentPassword(), accountEntity.getPassword())) {
                 throw new InvalidPasswordException();
             }
-            return new AccountDto(acc);
+
+            accountEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+            accountEntity.setUpdateTime(LocalDateTime.now());
+            accountEntity.setUpdateBy(Utils.getUpdateBy(email));
+
+            return accountEntity;
+
         }).orElseThrow(EmailNotExistException::new);
 
-        String newPassword = bCryptPasswordEncoder.encode(request.getNewPassword());
-        log.debug("Old password: {}", request.getCurrentPassword());
+        accountRepository.save(account);
+        log.info("New password for User: {}", account.getPassword());
 
-        accountRepository.updatePassword(accountDto.getEmail(), newPassword, LocalDateTime.now(), Utils.getUpdateBy(accountDto.getEmail()));
-        log.debug("New password: {}", newPassword);
+        // Send mail
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void executeCreateAccount(CreateAccountRequest request) {
 
-        EmployeeDto employees = employeesRepository.findByEmail(request.getEmail()).map(employeeMapper::toEmployeesDto).orElseThrow(EmailNotExistException::new);
-
         AccountEntity account = new AccountEntity();
 
-        account.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
-        account.setEmployeeCode(employees.getEmployeeCode());
-        account.setRoleId(Integer.valueOf(request.getRoleId()));
-        account.setCreateBy(Utils.getUpdateBy(employees.getEmail()));
-        account.setCreateTime(LocalDateTime.now());
-        account.setDeleteFlag(0);
+        employeesRepository.findByEmailAndDeleteFlag(request.getEmail(), 0).map(employeesEntity -> {
 
-        accountRepository.saveAndFlush(account);
+            account.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
+            account.setEmp(employeesEntity);
+            account.setRoleId(Integer.valueOf(request.getRoleId()));
+            account.setCreateBy(Utils.getUpdateBy(employeesEntity.getEmail()));
+            account.setCreateTime(LocalDateTime.now());
+            account.setDeleteFlag(0);
 
-        log.debug("Created Information for Account: {}", account);
+            return account;
+        }).orElseThrow(EmailNotExistException::new);
 
+        accountRepository.save(account);
+
+        log.info("Created Information for Account: {}", account);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void executeAddEmployees(AddEmployeesRequest request) {
 
-        EmployeesKey key = new EmployeesKey();
-        key.setEmail(request.getEmail());
-        key.setEmployeeCode(request.getEmployeeCode());
-
-        employeesRepository.findByEmailAndCode(request.getEmail(), request.getEmployeeCode()).ifPresent(em -> {
+        employeesRepository.findByEmailAndEmployeeCodeAndDeleteFlag(request.getEmail(), request.getEmployeeCode(), 0).ifPresent(em -> {
             throw new EmailAlreadyUsedException();
         });
 
         EmployeesEntity employeesEntity = new EmployeesEntity();
-        employeesEntity.setId(key);
+        employeesEntity.setEmployeeCode(request.getEmployeeCode());
+        employeesEntity.setEmail(request.getEmail());
         employeesEntity.setEmployeeName(StringUtils.upperCase(request.getEmployeeName()));
         employeesEntity.setCreateBy(Utils.getUpdateBy(request.getEmail()));
         employeesEntity.setCreateTime(LocalDateTime.now());
         employeesEntity.setDeleteFlag(0);
 
-        employeesRepository.saveAndFlush(employeesEntity);
+        employeesRepository.save(employeesEntity);
 
-        log.debug("Created Information for employees: {}", employeesEntity);
+        log.info("Created Information for employees: {}", employeesEntity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(SearchEmployeesRequest request) {
+    public PageAndDataResponseData<List<EmployeeDto>> executeGetListEmployees(String employeeName, String email, Pageable paging) {
 
-        int limit = Integer.parseInt(request.getTotalRecordOfPage());
-        int offset = (Integer.parseInt(request.getCurrentPage()) - 1) * limit;
+        Page<EmployeesEntity> pageEmployees = employeesRepository.findByEmailContainingAndEmployeeNameContainingAndDeleteFlag(email, employeeName, 0, paging);
+        List<EmployeeDto> employeeDtoList = pageEmployees.getContent().stream().map(employeeMapper::toEmployeesDto).collect(Collectors.toList());
 
-        List<EmployeeDto> employeeDtoList = employeesRepository
-                .getListEmployees(request.getEmail(), request.getEmployeeName(), offset, limit)
-                .stream()
-                .map(employeeMapper::toEmployeesDto)
-                .collect(Collectors.toList());
-
-        BigInteger totalRecord = employeesRepository.countEmployees(request.getEmail(), request.getEmployeeName());
-
-        return PageAndDataResponseData.create(employeeDtoList, request.getCurrentPage(), request.getCurrentPage(), String.valueOf(totalRecord));
+        return PageAndDataResponseData.create(employeeDtoList, pageEmployees.getTotalElements(), paging.getPageNumber(), paging.getPageSize());
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<EmployeeDto> executeGetDetailEmployee(String employeeCode) {
-        return employeesRepository.findByCode(employeeCode).map(employeeMapper::toEmployeesDto);
+        return employeesRepository.findByEmployeeCodeAndDeleteFlag(employeeCode, 0).map(employeeMapper::toEmployeesDto);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void executeUpdateEmployees(UpdateEmployeesRequest request) {
-        employeesRepository.findByCode(request.getEmployeeCode()).ifPresent(employee -> {
 
-            EmployeesKey key = employee.getId();
-            key.setEmail(request.getEmail());
+        employeesRepository.findByEmployeeCodeAndDeleteFlag(request.getEmployeeCode(), 0).ifPresent(employee -> {
 
-            employee.setId(key);
+            employee.setEmployeeCode(request.getEmployeeCode());
+            employee.setEmail(request.getEmail());
             employee.setEmployeeName(request.getEmployeeName());
             employee.setUpdateBy(Utils.getUpdateBy(request.getEmail()));
             employee.setUpdateTime(LocalDateTime.now());
 
-            log.debug("Changed Information for Employee: {}", employee);
+            log.info("Changed Information for Employee: {}", employee);
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeDto> executeGetAllEmployees() {
+        return employeesRepository.findByDeleteFlag(0)
+                .stream()
+                .map(employeeMapper::toEmployeesDto)
+                .collect(Collectors.toList());
     }
 }
